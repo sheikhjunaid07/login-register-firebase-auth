@@ -32,27 +32,28 @@ class _RegisterPageState extends State<RegisterPage> {
             ));
 
     //make sure password match
-    if (passwordController.text != confirmPwController) {
+    if (passwordController.text != confirmPwController.text) {
       Navigator.pop(context);
 
       //show error to user
       displayErrorMsgToUser("Password don't match", context);
-    }
+    } else {
+      //if password matched
+      try {
+        //creating a user
+        UserCredential? userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+                email: emailController.text, password: passwordController.text);
 
-    //creating a user
-    try {
-      UserCredential? userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-              email: emailController.text, password: passwordController.text);
+        //pop loading circle
+        Navigator.pop(context);
+      } on FirebaseAuthException catch (e) {
+        //pop loading circle
+        Navigator.pop(context);
 
-      //pop loading circle
-      Navigator.pop(context);
-    } on FirebaseAuthException catch (e) {
-      //pop loading circle
-      Navigator.pop(context);
-
-      //display error msg to user
-      displayErrorMsgToUser(e.code, context);
+        //display error msg to user
+        displayErrorMsgToUser(e.code, context);
+      }
     }
   }
 
@@ -120,7 +121,7 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 18),
 
               //login button
-              MyButton(text: "Register", onTap: () => register),
+              MyButton(text: "Register", onTap: () => register()),
 
               const SizedBox(
                 height: 8,

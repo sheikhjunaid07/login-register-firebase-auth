@@ -1,17 +1,42 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_auth/components/my_button.dart';
 import 'package:login_auth/components/my_text_field.dart';
+import 'package:login_auth/helper/helper_functions.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   final void Function()? onTap;
 
-  LoginPage({super.key, required this.onTap});
+  const LoginPage({super.key, required this.onTap});
 
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   //text controller
   final TextEditingController emailController = TextEditingController();
+
   final TextEditingController passwordController = TextEditingController();
 
-  void login() {}
+  void login() async {
+    showDialog(
+        context: context,
+        builder: (context) => const Center(
+              child: CircularProgressIndicator(),
+            ));
+
+    //try sign in
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: emailController.text, password: passwordController.text);
+
+      if (context.mounted) Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      Navigator.pop(context);
+      displayErrorMsgToUser(e.code, context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +107,7 @@ class LoginPage extends StatelessWidget {
                         color: Theme.of(context).colorScheme.inversePrimary),
                   ),
                   GestureDetector(
-                    onTap: onTap,
+                    onTap: widget.onTap,
                     child: const Text(
                       "Register here",
                       style: TextStyle(fontWeight: FontWeight.bold),
